@@ -178,7 +178,7 @@ class AutoAddWords:
                     print(f"  词库文件太大，词组超过{max_words}，跳过  {os.path.basename(dict_path)}")
                     continue
                 total_phrases += parsed_count
-                print(f"  解析出 {parsed_count} 个词组")
+                print(f"  解析出 {parsed_count} 个词组 ",end="")
                 
                 if not phrases:
                     print(f"  词库中没有可用的词组，跳过")
@@ -194,9 +194,9 @@ class AutoAddWords:
                         print(f"  添加类别失败  {addresult['message']}")
                         return
                     categorys = {x['name']: x['id'] for x in self.api_client.get_category()}
-                    print(categorys)
+                    # print(categorys)
                     category_id = categorys[category_name]
-                print(f"  词库类别: {category_name}, 类别ID: {category_id}")
+                print(f"  词库类别: {category_name}, 类别ID: {category_id} ",end="")
                 
                 # 5. 过滤和生成编码
                 valid_phrases = []
@@ -208,14 +208,14 @@ class AutoAddWords:
                         phrases_not_in_base.append(phrase)
                 
                 not_in_base_count = len(phrases_not_in_base)
-                print(f"  基础词库中不存在的词组: {not_in_base_count} 个")
+                print(f"  基础词库中不存在的词组: {not_in_base_count} 个 ",end="")
                 
                 if not phrases_not_in_base:
                     print(f"  所有词组都已存在于基础词库中，跳过")
                     continue
                 
                 # 获取数据库中所有已存在的词组
-                print(f"  正在检查数据库中已存在的词组...")
+                # print(f"  正在检查数据库中已存在的词组...")
                 # 每次加载已经字入的词库，
                 # words = set([x['word'] for x in self.api_client.get_words()])    # 后端会检查重复的词库
                 # existing_count = len(words)
@@ -254,17 +254,17 @@ class AutoAddWords:
                     else:
                         code_failed_count += 1
                 
-                print(f"  成功生成编码: {generated_count} 个，生成失败: {code_failed_count} 个")
+                print(f"  成功生成编码: {generated_count} 个，词组不符合要求: {code_failed_count} 个")
                 print(f"  最终符合条件的词组: {len(valid_phrases)} 个")
                 
                 # 6. 批量添加词组
                 if valid_phrases:
-                    print(f"  准备批量添加词组，每批 {batch_size} 个")
+                    # print(f"  准备批量添加词组，每批 {batch_size} 个")
                     for i in range(0, len(valid_phrases), batch_size):
                         batch = valid_phrases[i:i+batch_size]
                         batch_num = i // batch_size + 1
                         total_batches = (len(valid_phrases) + batch_size - 1) // batch_size
-                        print(f"\n  批次 {batch_num}/{total_batches}: 添加 {len(batch)} 个词组")
+                        print(f"\n  批次 {batch_num}/{total_batches}: 添加 {len(batch)} 个词组 ",end="")
                         
                         try:
                             result = self.api_client.add_words(batch)
@@ -301,8 +301,8 @@ class AutoAddWords:
             # 清理资源
             print("清理资源完成")
         # 输出统计信息
-        print(f"处理词库文件: {processed_dicts} 个")
-        print(f"总解析词组: {total_phrases} 个")
+        print(f"处理词库文件: {processed_dicts} 个 ",end="")
+        print(f"总解析词组: {total_phrases} 个 ",end="")
         print(f"成功添加词组: {total_added} 个")
 
 
