@@ -127,5 +127,106 @@ function checkCategoryExist(categoryName: string){
     return getDataFromDB( DB_NAME, sqlArray)
 }
 
+// 检查类别是否被使用
+function checkCategoryInUse(categoryId: number){
+    let sqlArray = []
+    sqlArray.push(`select count(*) as count from wubi_words where category_id=${categoryId}`)
+    return getDataFromDB( DB_NAME, sqlArray, true)
+}
+
+// 添加词条类别
+router.post('/add-category', (req, res) => {
+    const categoryName = req.body.name
+    if (!categoryName) {
+        return res.send(new ResponseError('', '参数错误，缺少类别名称'))
+    }
+    
+    checkCategoryExist(categoryName)
+        .then(existCategory => {
+            if (existCategory.length > 0) {
+                return res.send(new ResponseError('', '类别名称已存在'))
+            }
+            
+            verifyAuthorization(req)
+                .then(userInfo => {
+                    if (userInfo.group_id === EnumUserGroup.ADMIN) {
+                        let timeNow = dateFormatter(new Date())
+                        let sqlArray = []
+                        sqlArray.push(`
+                            insert into ${CURRENT_TABLE}(name, sort_id, date_init)
+                            values ('${categoryName}', 0, '${timeNow}')
+                        `)
+                        
+                        getDataFromDB(DB_NAME, sqlArray)
+                            .then(data => {
+                                res.send(new ResponseSuccess({ id: data.insertId, name: categoryName }, '添加成功'))
+                            })
+                            .catch(err => {
+                                res.send(new ResponseError(err, '添加失败'))
+                            })
+                    } else {
+                        res.send(new ResponseError('', '无权操作'))
+                    }
+                })
+                .catch(err => {
+                    res.send(new ResponseError(err, '认证失败'))
+                })
+        })
+        .catch(err => {
+            res.send(new ResponseError(err, '检查类别存在失败'))
+        })
+})
+
+// 删除词条类别
+router.delete('/delete-category', (req, res) => {
+    const categoryName = req.body.name
+    if (!categoryName) {
+        return res.send(new ResponseError('', '参数错误，缺少类别名称'))
+    }
+    
+    verifyAuthorization(req)
+        .then(userInfo => {
+            if (userInfo.group_id === EnumUserGroup.ADMIN) {
+                // 先根据名称获取id
+                let sqlArray = []
+                sqlArray.push(`select id from ${CURRENT_TABLE} where name='${categoryName}'`)
+                
+                getDataFromDB(DB_NAME, sqlArray, true)
+                    .then(categoryInfo => {
+                        if (!categoryInfo) {
+                            return res.send(new ResponseError('', '类别不存在'))
+                        }
+                        
+                        const categoryId = categoryInfo.id
+                        
+                        // 检查类别是否被使用
+                        checkCategoryInUse(categoryId)
+                            .then(useCount => {
+                                if (useCount.count > 0) {
+                                    return res.send(new ResponseError('', `类别正在被使用，无法删除。当前使用数量：${useCount.count}`))
+                                }
+                                
+                                // 执行删除
+                                let deleteSqlArray = []
+                                deleteSqlArray.push(`delete from ${CURRENT_TABLE} where id=${categoryId}`)
+                                
+                                operate_db_without_return(userInfo.uid, DB_NAME, DATA_NAME, deleteSqlArray, '删除', res)
+                            })
+                            .catch(err => {
+                                res.send(new ResponseError(err, '检查类别使用情况失败'))
+                            })
+                    })
+                    .catch(err => {
+                        res.send(new ResponseError(err, '获取类别信息失败'))
+                    })
+            } else {
+                res.send(new ResponseError('', '无权操作'))
+            }
+        })
+        .catch(err => {
+            res.send(new ResponseError(err, '认证失败'))
+        })
+})
+
 export default router
 

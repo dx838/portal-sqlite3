@@ -1,73 +1,75 @@
 @echo off
 chcp 65001 >nul
 
+cd /d %~dp0
+
 echo ======================================
-echo Portal��Ŀ�����ű�
+echo Portal项目启动脚本
 echo ======================================
 echo.
 
-:: ���Node.js�Ƿ�װ
+:: 检查Node.js是否安装
 where node >nul 2>nul
 if %errorlevel% neq 0 (
-    echo ����δ��װNode.js
-    echo ���Ȱ�װNode.js 24����߰汾
+    echo 系统未安装Node.js
+    echo 请先安装Node.js 24或更高版本
     pause
     exit /b 1
 )
 
-echo �Ѱ�װNode.js��
+echo 已安装Node.js版本：
 node --version
 echo.
 
-:: ���npm�Ƿ�װ
+:: 检查npm是否安装
 where npm >nul 2>nul
 if %errorlevel% neq 0 (
-    echo ����δ��װnpm
-    echo ���Ȱ�װnpm
+    echo 系统未安装npm
+    echo 请先安装npm
     pause
     exit /b 1
 )
 
-echo �Ѱ�װnpm��
+echo 已安装npm版本：
 npm --version
 echo.
 
-:: ���node_modules�Ƿ����
+:: 检查node_modules是否存在
 if not exist "node_modules" (
-    echo ���ڰ�װ����...
+    echo 正在安装依赖...
     npm install
     if %errorlevel% neq 0 (
-        echo ���󣺰�װ����ʧ��
+        echo 错误：安装依赖失败
         pause
         exit /b 1
     )
-    echo ������װ�ɹ�
+    echo 依赖安装成功
     echo.
 )
 
-:: ����TypeScript����
-echo ���ڱ���TypeScript����...
+:: 编译TypeScript代码
+echo 正在编译TypeScript代码...
 npm run build
 if %errorlevel% neq 0 (
-    echo ���󣺱���ʧ��
+    echo 错误：编译失败
     pause
     exit /b 1
 )
-echo ����ɹ�
+echo 编译成功
 
 echo.
 echo ======================================
-echo ����������Ŀ...
-echo ���ʵ�ַ��http://localhost:3000
+echo 正在启动项目...
+echo 访问地址：http://localhost:3000/portal/
 echo ======================================
 echo.
 
-:: ������Ŀ
+:: 启动项目
 npm run serve
 
 if %errorlevel% neq 0 (
     echo.
-    echo ������Ŀ����ʧ��
+    echo 项目启动失败
     pause
     exit /b 1
 )

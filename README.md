@@ -186,5 +186,6 @@ portal-sqlite3/
 
 ## 十、鸣谢
 1. 感谢 KyleBing 提供的开源项目 [portal](https://github.com/KyleBing/portal) 、 [wubi-dict-editor](https://github.com/KyleBing/wubi-dict-editor)。
-2. 感谢 Trae、CodeBuddy 两位大佬的帮助。
+2. 感谢 StuPeter 提供的开源项目。[Sougou_dict_spider](https://github.com/StuPeter/Sougou_dict_spider)
+3. 感谢 Trae、CodeBuddy 两位大佬的帮助。
 

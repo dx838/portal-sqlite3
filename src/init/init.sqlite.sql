@@ -28,7 +28,7 @@ INSERT INTO user_group VALUES (2, 'user', '普通成员');
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (
   uid INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-  email TEXT NOT NULL,
+  email TEXT NOT NULL constraint users_email_pk unique,
   nickname TEXT NOT NULL,
   username TEXT NOT NULL,
   password TEXT NOT NULL,
@@ -61,7 +61,7 @@ CREATE TABLE users (
 DROP TABLE IF EXISTS invitations;
 CREATE TABLE invitations (
   id TEXT NOT NULL PRIMARY KEY,
-  date_create DATETIME NOT NULL,
+  date_create DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   date_register DATETIME NULL DEFAULT NULL,
   binding_uid INTEGER NULL DEFAULT NULL,
   FOREIGN KEY (binding_uid) REFERENCES users (uid)
@@ -75,9 +75,9 @@ CREATE TABLE invitations (
 DROP TABLE IF EXISTS wubi_category;
 CREATE TABLE wubi_category (
   id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-  name TEXT NOT NULL,
+  name TEXT NOT NULL constraint wubi_category_name_pk unique,
   sort_id INTEGER NOT NULL,
-  date_init DATETIME NOT NULL
+  date_init DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ----------------------------
@@ -100,10 +100,11 @@ CREATE TABLE wubi_dict (
   content TEXT NOT NULL,
   content_size INTEGER NULL DEFAULT 0,
   word_count INTEGER NULL DEFAULT 0,
-  date_init DATETIME NOT NULL,
-  date_update DATETIME NULL DEFAULT NULL,
+  date_init DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  date_update DATETIME NULL DEFAULT NULL DEFAULT CURRENT_TIMESTAMP,
   comment TEXT NULL DEFAULT NULL,
   uid INTEGER NULL DEFAULT NULL,
+  constraint wubi_dict_title_uid_pk unique (title, uid),
   FOREIGN KEY (uid) REFERENCES users (uid)
 );
 
@@ -125,6 +126,7 @@ CREATE TABLE wubi_words (
   comment TEXT DEFAULT NULL,
   uid INTEGER NOT NULL,
   category_id INTEGER NOT NULL,
+  constraint wubi_words_word_code_pk unique (word, code),
   FOREIGN KEY (category_id) REFERENCES wubi_category (id),
   FOREIGN KEY (uid) REFERENCES users (uid)
 );
