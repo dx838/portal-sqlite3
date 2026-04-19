@@ -66,6 +66,8 @@ class SougouDictHandler:
         category_name = os.path.basename(dict_path).split('.')[0].split('_')[-1].split('[')[0].split('【')[0]
         return category_name
 
+    # def get_hotword_dicts(self) -> 
+
 
 if __name__ == '__main__':
     sg = SougouDictHandler(['广州市地铁站名:198'])

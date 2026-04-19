@@ -170,3 +170,45 @@ class SougouSpider:
         with open(path, "wb") as fw:
             fw.write(resp.content)
         time.sleep(8)  # 防止被waf判定为恶意
+
+    def GetHotWordList(self,hotlist=[1,2,3,4]) -> list:
+        """获取热门词列表"""
+        # https://pinyin.sogou.com/dict/ 获取热词
+        # hot_tag_1 hot_tag_2 hot_tag_3 hot_tag_4 
+        # 查找 <a /a> 中的文本
+        hotWordList = []
+        resp=self.GetHtml("https://pinyin.sogou.com/dict/")
+        soup = BeautifulSoup(resp.text, "html.parser")
+        if hotlist:
+            for hotnum in hotlist:
+                hot_tag = f"hot_tag_{hotnum}"
+                dev_hot_lists = soup.find_all("ul", class_=hot_tag)
+                for dev_hot in dev_hot_lists:
+                    # 查找所有的li标签
+                    li_hot_lists = dev_hot.find_all("li")
+                    for li_hot in li_hot_lists:
+                        # 查找a标签
+                        a_tag = li_hot.find("a")
+                        if a_tag:
+                            # 查找span标签
+                            span_tag = a_tag.find("span", class_="exponent")
+                            if span_tag:
+                                # 提取span标签之后的文本
+                                word = span_tag.next_sibling.strip()
+                                hotWordList.append(word)
+                            else:
+                                # 如果没有span标签，直接获取a标签的文本
+                                word = a_tag.get_text().strip()
+                                hotWordList.append(word)
+        # 
+        return hotWordList
+
+
+if __name__ == '__main__':
+    # test
+    spider = SougouSpider()
+    # spider.GetDownloadList()
+    # spider.GetDownloadListMoreInfo()
+    # spider.Download()
+    test = spider.GetHotWordList()
+    print(test)
